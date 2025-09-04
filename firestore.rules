@@ -1,0 +1,14 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permitir acesso público à coleção lista-familia
+    match /lista-familia/{document} {
+      allow read, write: if true;
+    }
+    
+    // Outras coleções podem ter regras mais restritivas
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INÍCIO DA CONFIGURAÇÃO DO FIREBASE ---
 
-    // Configuração do Firebase usando variáveis de ambiente
+    // Configuração do Firebase usando variáveis de ambiente com fallbacks
     const firebaseConfig = {
       apiKey: window.FIREBASE_API_KEY || "AIzaSyCGEhMkaeE_s-m3sVEn3Pj-pzbBFP01Sw4",
       authDomain: window.FIREBASE_AUTH_DOMAIN || "lista-de-compras-pwa-9d312.firebaseapp.com",
@@ -18,8 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INICIALIZAÇÃO E LÓGICA DO APP ---
 
     // Inicializa o Firebase
+    console.log('Inicializando Firebase...'); // Debug
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    console.log('Firebase inicializado com sucesso'); // Debug
 
     // Referências do DOM
     const shoppingList = document.getElementById('shopping-list');
@@ -144,8 +146,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função principal de inicialização
     const initializeApp = () => {
+        console.log('initializeApp: iniciando aplicação'); // Debug
+        
+        // Verificar se Firebase foi inicializado
+        if (!firebase.apps.length) {
+            console.error('Firebase não foi inicializado!'); // Debug
+            return;
+        }
+        
+        if (!db) {
+            console.error('Firestore não está disponível!'); // Debug
+            return;
+        }
+        
         // Lista global única para toda a família
         itemsCollection = db.collection('lista-familia');
+        console.log('initializeApp: itemsCollection criada'); // Debug
         
         // Limpar URL de parâmetros antigos se existirem
         if (window.location.search) {
@@ -166,6 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Carregar itens
         listenForItems();
+        
+        console.log('initializeApp: aplicação inicializada com sucesso'); // Debug
     };
 
     // Inicializar tema
@@ -385,7 +403,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Adiciona um novo item ao Firestore
     const addItem = (itemName) => {
-        if (!itemName.trim()) return;
+        console.log('addItem chamado com:', itemName); // Debug
+        
+        if (!itemName.trim()) {
+            console.log('addItem: nome vazio, abortando'); // Debug
+            return;
+        }
+        
+        if (!itemsCollection) {
+            console.error('addItem: itemsCollection não está inicializada!'); // Debug
+            return;
+        }
         
         // Verificar se item já existe na lista
         const existingItem = allItems.find(item => 
@@ -393,11 +421,16 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         
         if (existingItem) {
+            console.log('addItem: item já existe, aumentando quantidade'); // Debug
             // Se existe, aumentar quantidade
             const newQuantity = (existingItem.quantidade || 1) + 1;
             itemsCollection.doc(existingItem.id).update({ 
                 quantidade: newQuantity,
                 comprado: false // Desmarcar se estiver comprado
+            }).then(() => {
+                console.log('addItem: quantidade atualizada com sucesso'); // Debug
+            }).catch(error => {
+                console.error('addItem: erro ao atualizar quantidade:', error); // Debug
             });
             
             // Dar feedback visual
@@ -413,12 +446,30 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        itemsCollection.add({
+        console.log('addItem: adicionando novo item'); // Debug
+        
+        // Adicionar timeout para detectar problemas de conectividade
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout: Firebase demorou mais de 10s')), 10000);
+        });
+        
+        const addPromise = itemsCollection.add({
             nome: itemName.trim(),
             quantidade: 1,
             comprado: false,
             adicionadoEm: firebase.firestore.FieldValue.serverTimestamp()
         });
+        
+        Promise.race([addPromise, timeoutPromise])
+            .then((docRef) => {
+                console.log('addItem: item adicionado com sucesso, ID:', docRef.id); // Debug
+            })
+            .catch(error => {
+                console.error('addItem: erro ao adicionar item:', error); // Debug
+                
+                // Mostrar feedback visual de erro para o usuário
+                alert(`Erro ao adicionar item: ${error.message}`);
+            });
     };
 
     // Remove um item completamente
@@ -504,6 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const handleItemClick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                console.log('Item clicado:', itemText); // Debug
                 addItem(itemText);
                 // Feedback visual
                 itemEl.style.transform = 'scale(0.95)';

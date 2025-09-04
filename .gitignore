@@ -6,9 +6,20 @@ yarn-error.log*
 
 # Firebase config (sensitive data)
 firebase-config.js
-.env
-.env.local
-.env.production
+.env*
+env-config.local.js
+
+# Arquivos de configuração sensível
+*config*.local.*
+*.secret.*
+.secrets/
+
+# Chaves e certificados
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
 
 # Build outputs
 dist/
