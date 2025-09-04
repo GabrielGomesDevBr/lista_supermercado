@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const addItemForm = document.getElementById('add-item-form');
     const itemInput = document.getElementById('item-input');
     const clearPurchasedButton = document.getElementById('clear-purchased-button');
-    const shareButton = document.getElementById('share-button');
     const categoryChips = document.getElementById('category-chips');
     const quickAddContainer = document.getElementById('quick-add-container');
     const themeToggle = document.getElementById('theme-toggle');
@@ -82,32 +81,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    let currentListId = null;
     let itemsCollection = null;
     let allItems = [];
     let filteredItems = [];
     let currentTheme = localStorage.getItem('theme') || 'light';
 
-    // Função para obter o ID da lista da URL
-    const getListIdFromUrl = () => {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('lista');
-    };
-
-    // Função para gerar um ID aleatório simples
-    const generateId = () => Math.random().toString(36).substring(2, 10);
-
     // Função principal de inicialização
     const initializeApp = () => {
-        currentListId = getListIdFromUrl();
-
-        if (!currentListId) {
-            currentListId = generateId();
-            // Redireciona para a URL com o novo ID da lista
-            window.history.replaceState({}, '', `?lista=${currentListId}`);
+        // Lista global única para toda a família
+        itemsCollection = db.collection('lista-familia');
+        
+        // Limpar URL de parâmetros antigos se existirem
+        if (window.location.search) {
+            window.history.replaceState({}, '', window.location.pathname);
         }
-
-        itemsCollection = db.collection('listas').doc(currentListId).collection('itens');
         
         // Inicializar tema
         initializeTheme();
@@ -498,31 +485,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Clear purchased
         clearPurchasedButton.addEventListener('click', clearPurchased);
-
-        // Share button
-        shareButton.addEventListener('click', () => {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Lista de Compras Compartilhada',
-                    text: 'Clique no link para ver e editar nossa lista de compras!',
-                    url: window.location.href,
-                });
-            } else {
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    // Feedback melhorado
-                    const originalText = shareButton.textContent;
-                    shareButton.textContent = 'Copiado!';
-                    shareButton.style.background = 'var(--success-color)';
-                    shareButton.style.color = 'white';
-                    
-                    setTimeout(() => {
-                        shareButton.textContent = originalText;
-                        shareButton.style.background = '';
-                        shareButton.style.color = '';
-                    }, 2000);
-                });
-            }
-        });
 
         // Category chips
         categoryChips.addEventListener('click', (e) => {

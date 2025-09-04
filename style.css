@@ -117,10 +117,7 @@ header button:hover {
     }
 }
 
-#share-button {
-    border-color: var(--secondary-color);
-    color: var(--secondary-color);
-}
+/* Botão de compartilhamento removido - agora é lista global */
 
 /* --- Search Container --- */
 .search-container {

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Compras</title>
-    <link rel="stylesheet" href="style.css?v=3">
-    <link rel="manifest" href="manifest.json?v=3">
+    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="manifest" href="manifest.json?v=4">
     <meta name="theme-color" content="#2c3e50"/>
     
     <!-- PWA Meta Tags -->
@@ -30,7 +30,6 @@
         <div class="header-right">
             <button id="theme-toggle" class="theme-toggle" title="Alternar tema">🌙</button>
             <button id="search-toggle" class="search-toggle" title="Buscar itens">🔍</button>
-            <button id="share-button" title="Compartilhar lista">Compartilhar</button>
             <button id="clear-purchased-button" title="Limpar itens comprados">Limpar Comprados</button>
         </div>
     </header>
@@ -42,7 +41,7 @@
 
     <main>
         <div id="predefined-items">
-            <h2>Adicionar Itens Rápidos</h2>
+            <h2>📋 Lista da Família - Adicionar Itens Rápidos</h2>
             <div id="category-chips">
                 <!-- As categorias são carregadas dinamicamente aqui -->
             </div>
@@ -52,9 +51,9 @@
         <div class="list-section">
             <h2>📋 A Comprar</h2>
             <div id="empty-state-pending" class="empty-state hidden">
-                <div class="empty-icon">🛒</div>
-                <p>Sua lista está vazia!</p>
-                <span>Adicione alguns itens para começar</span>
+                <div class="empty-icon">🏠</div>
+                <p>Lista da família está vazia!</p>
+                <span>Qualquer um pode adicionar itens aqui</span>
             </div>
             <ul id="shopping-list">
                 <!-- Itens da lista aparecerão aqui -->
@@ -81,10 +80,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
     <!-- Environment Config -->
-    <script src="env-config.js?v=3"></script>
+    <script src="env-config.js?v=4"></script>
     
     <!-- App Script -->
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
 
 </body>
 </html>

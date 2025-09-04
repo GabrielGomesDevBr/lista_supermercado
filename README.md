@@ -1,6 +1,6 @@
 # 🛒 Lista de Compras Colaborativa
 
-Uma aplicação PWA moderna e responsiva para gerenciar listas de compras em família, com sincronização em tempo real via Firebase.
+Uma aplicação PWA moderna e responsiva para gerenciar uma lista de compras familiar global, com sincronização automática em tempo real via Firebase. Todos que instalam o app automaticamente compartilham a mesma lista!
 
 ## ✨ Funcionalidades
 
@@ -8,7 +8,8 @@ Uma aplicação PWA moderna e responsiva para gerenciar listas de compras em fam
 - 🌙 **Modo escuro/claro** com preferência salva
 - 🔍 **Busca e filtros** em tempo real
 - 🏷️ **10 categorias** com 150+ itens pré-definidos
-- ✅ **Sincronização em tempo real** entre dispositivos
+- ✅ **Lista familiar global** - todos automaticamente conectados
+- ✅ **Sincronização em tempo real** entre todos os dispositivos
 - 📊 **Contador inteligente** de itens pendentes
 - 🎯 **Interface intuitiva** com micro-interações
 - ♿ **Acessível** com suporte completo ao teclado
@@ -113,12 +114,15 @@ service cloud.firestore {
 
 ## 💡 Como Usar
 
-1. **Compartilhar lista**: Clique em "Compartilhar" e envie o link
-2. **Modo escuro**: Toggle no header (🌙/☀️)
+1. **Lista automática**: Todos que abrem o app veem a mesma lista da família
+2. **Modo escuro**: Toggle no header (🌙/☀️)  
 3. **Buscar**: Clique na lupa para filtrar itens
 4. **Adicionar rápido**: Selecione uma categoria e clique nos itens
-5. **Marcar como comprado**: Clique no círculo ao lado do item
-6. **Limpar comprados**: Botão no header remove todos os itens marcados
+5. **Quantidade**: Adicione o mesmo item várias vezes para aumentar quantidade
+6. **Editar**: Clique duplo no nome do item para editar
+7. **Remover**: Clique no X vermelho para remover item
+8. **Marcar como comprado**: Clique no círculo ao lado do item
+9. **Limpar comprados**: Botão no header remove todos os itens marcados
 
 ## 🔒 Segurança
 
