@@ -1,0 +1,21 @@
+{
+    "name": "Lista de Compras Colaborativa",
+    "short_name": "Lista",
+    "description": "Uma lista de compras simples, rápida e colaborativa.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f4f4f4",
+    "theme_color": "#2c3e50",
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

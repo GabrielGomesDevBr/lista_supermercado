@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Compras</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f4f4f4"/>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <h1>🛒 Lista de Compras</h1>
+            <span id="item-counter" class="item-counter">0 itens</span>
+        </div>
+        <div class="header-right">
+            <button id="theme-toggle" class="theme-toggle" title="Alternar tema">🌙</button>
+            <button id="search-toggle" class="search-toggle" title="Buscar itens">🔍</button>
+            <button id="share-button" title="Compartilhar lista">Compartilhar</button>
+            <button id="clear-purchased-button" title="Limpar itens comprados">Limpar Comprados</button>
+        </div>
+    </header>
+
+    <div id="search-container" class="search-container hidden">
+        <input type="text" id="search-input" placeholder="Buscar na lista..." autocomplete="off">
+        <button id="clear-search">✕</button>
+    </div>
+
+    <main>
+        <div id="predefined-items">
+            <h2>Adicionar Itens Rápidos</h2>
+            <div id="category-chips">
+                <!-- As categorias são carregadas dinamicamente aqui -->
+            </div>
+            <div id="quick-add-container"></div>
+        </div>
+
+        <div class="list-section">
+            <h2>📋 A Comprar</h2>
+            <div id="empty-state-pending" class="empty-state hidden">
+                <div class="empty-icon">🛒</div>
+                <p>Sua lista está vazia!</p>
+                <span>Adicione alguns itens para começar</span>
+            </div>
+            <ul id="shopping-list">
+                <!-- Itens da lista aparecerão aqui -->
+            </ul>
+        </div>
+
+        <div class="list-section" id="purchased-section">
+            <h2>✅ Comprados</h2>
+            <ul id="purchased-list">
+                <!-- Itens comprados aparecerão aqui -->
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <form id="add-item-form">
+            <input type="text" id="item-input" placeholder="Adicionar item avulso..." autocomplete="off" required>
+            <button type="submit">+</button>
+        </form>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <!-- Environment Config -->
+    <script src="env-config.js"></script>
+    
+    <!-- App Script -->
+    <script src="app.js"></script>
+
+</body>
+</html>
