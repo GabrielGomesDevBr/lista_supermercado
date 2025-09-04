@@ -201,18 +201,103 @@ document.addEventListener('DOMContentLoaded', () => {
         li.className = item.comprado ? 'purchased' : '';
         li.dataset.id = item.id;
 
+        // Checkbox
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'item-checkbox';
         checkbox.checked = item.comprado;
         checkbox.addEventListener('change', () => togglePurchased(item.id, !item.comprado));
 
+        // Container do item (nome + quantidade)
+        const itemContent = document.createElement('div');
+        itemContent.className = 'item-content';
+
+        // Nome do item (editável no clique duplo)
         const name = document.createElement('span');
         name.className = 'item-name';
-        name.textContent = item.nome;
+        const quantity = item.quantidade || 1;
+        name.textContent = quantity > 1 ? `${quantity}x ${item.nome}` : item.nome;
+        
+        // Edição do nome
+        name.addEventListener('dblclick', () => {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = item.nome;
+            input.className = 'item-name-edit';
+            
+            const save = () => {
+                if (input.value.trim() && input.value.trim() !== item.nome) {
+                    editItemName(item.id, input.value.trim());
+                }
+                name.style.display = '';
+                input.remove();
+            };
+            
+            input.addEventListener('blur', save);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') save();
+                if (e.key === 'Escape') {
+                    name.style.display = '';
+                    input.remove();
+                }
+            });
+            
+            name.style.display = 'none';
+            itemContent.appendChild(input);
+            input.focus();
+            input.select();
+        });
 
+        // Controles de quantidade (só para itens não comprados)
+        const controls = document.createElement('div');
+        controls.className = 'item-controls';
+
+        if (!item.comprado) {
+            // Botão diminuir quantidade
+            const decreaseBtn = document.createElement('button');
+            decreaseBtn.className = 'quantity-btn decrease';
+            decreaseBtn.innerHTML = '−';
+            decreaseBtn.title = 'Diminuir quantidade';
+            decreaseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if ((item.quantidade || 1) > 1) {
+                    updateQuantity(item.id, -1);
+                } else {
+                    removeItem(item.id);
+                }
+            });
+
+            // Botão aumentar quantidade
+            const increaseBtn = document.createElement('button');
+            increaseBtn.className = 'quantity-btn increase';
+            increaseBtn.innerHTML = '+';
+            increaseBtn.title = 'Aumentar quantidade';
+            increaseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                updateQuantity(item.id, 1);
+            });
+
+            controls.appendChild(decreaseBtn);
+            controls.appendChild(increaseBtn);
+        }
+
+        // Botão remover
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.innerHTML = '✕';
+        removeBtn.title = 'Remover item';
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeItem(item.id);
+        });
+
+        controls.appendChild(removeBtn);
+
+        // Montar estrutura
+        itemContent.appendChild(name);
         li.appendChild(checkbox);
-        li.appendChild(name);
+        li.appendChild(itemContent);
+        li.appendChild(controls);
 
         if (item.comprado) {
             purchasedList.appendChild(li);
@@ -248,10 +333,13 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         
         if (existingItem) {
-            // Se existe e está comprado, desmarcar
-            if (existingItem.comprado) {
-                togglePurchased(existingItem.id, false);
-            }
+            // Se existe, aumentar quantidade
+            const newQuantity = (existingItem.quantidade || 1) + 1;
+            itemsCollection.doc(existingItem.id).update({ 
+                quantidade: newQuantity,
+                comprado: false // Desmarcar se estiver comprado
+            });
+            
             // Dar feedback visual
             const existingElement = document.querySelector(`li[data-id="${existingItem.id}"]`);
             if (existingElement) {
@@ -267,9 +355,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         itemsCollection.add({
             nome: itemName.trim(),
+            quantidade: 1,
             comprado: false,
             adicionadoEm: firebase.firestore.FieldValue.serverTimestamp()
         });
+    };
+
+    // Remove um item completamente
+    const removeItem = (itemId) => {
+        if (confirm('Tem certeza que deseja remover este item da lista?')) {
+            itemsCollection.doc(itemId).delete();
+        }
+    };
+
+    // Atualiza a quantidade de um item
+    const updateQuantity = (itemId, delta) => {
+        const item = allItems.find(i => i.id === itemId);
+        if (!item) return;
+        
+        const newQuantity = Math.max(1, (item.quantidade || 1) + delta);
+        itemsCollection.doc(itemId).update({ quantidade: newQuantity });
+    };
+
+    // Edita o nome de um item
+    const editItemName = (itemId, newName) => {
+        if (!newName.trim()) return;
+        itemsCollection.doc(itemId).update({ nome: newName.trim() });
     };
 
     // Alterna o estado 'comprado' de um item

@@ -204,18 +204,24 @@ ul {
 li {
     display: flex;
     align-items: center;
-    padding: 15px 8px;
+    padding: 12px 8px;
     border-bottom: 1px solid var(--background-color);
     transition: var(--transition);
     border-radius: 8px;
     margin-bottom: 2px;
     animation: slideIn 0.3s ease-out;
     position: relative;
+    gap: 12px;
 }
 
 li:hover {
     background-color: var(--background-color);
     transform: translateX(2px);
+}
+
+li:hover .item-controls {
+    opacity: 1;
+    transform: translateX(0);
 }
 
 @keyframes slideIn {
@@ -300,10 +306,124 @@ li.purchased .item-name {
     }
 }
 
-.item-name {
+.item-content {
     flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.item-name {
     font-size: 1rem;
     line-height: 1.4;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.item-name:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.item-name-edit {
+    font-size: 1rem;
+    border: 2px solid var(--secondary-color);
+    border-radius: 4px;
+    padding: 4px 8px;
+    background-color: var(--surface-color);
+    color: var(--text-color);
+    outline: none;
+    min-width: 150px;
+}
+
+/* --- Controles de Item --- */
+.item-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.7;
+    transform: translateX(10px);
+    transition: var(--transition);
+}
+
+.quantity-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--gray-light);
+    background-color: var(--surface-color);
+    color: var(--text-color);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.quantity-btn:hover {
+    background-color: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+    transform: scale(1.1);
+}
+
+.quantity-btn.decrease:hover {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.remove-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--danger-color);
+    background-color: var(--surface-color);
+    color: var(--danger-color);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    margin-left: 4px;
+}
+
+.remove-btn:hover {
+    background-color: var(--danger-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* --- Estados dos itens --- */
+li.purchased .item-controls {
+    opacity: 0.5;
+}
+
+li.purchased .quantity-btn {
+    display: none;
+}
+
+/* --- Responsividade para controles --- */
+@media (max-width: 480px) {
+    .item-controls {
+        opacity: 1;
+        transform: translateX(0);
+        gap: 2px;
+    }
+    
+    .quantity-btn, .remove-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.85rem;
+    }
+    
+    .item-name-edit {
+        min-width: 120px;
+        font-size: 0.9rem;
+    }
 }
 
 /* --- Empty States --- */
