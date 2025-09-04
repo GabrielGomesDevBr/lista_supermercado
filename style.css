@@ -97,7 +97,7 @@ header button:hover {
     transform: translateY(-1px);
 }
 
-.theme-toggle, .search-toggle {
+.theme-toggle, .search-toggle, .manage-custom-button {
     font-size: 1rem;
     padding: 6px;
 }
@@ -112,7 +112,7 @@ header button:hover {
         font-size: 0.7rem;
     }
     
-    .theme-toggle, .search-toggle {
+    .theme-toggle, .search-toggle, .manage-custom-button {
         padding: 4px;
     }
 }
@@ -574,6 +574,32 @@ li.purchased .quantity-btn {
     transform: translateY(0) scale(0.98);
 }
 
+/* Estilos para itens personalizados */
+.custom-item {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2) !important;
+    color: #e65100 !important;
+    font-weight: 500;
+    border: 1px solid #ffcc80;
+}
+
+.custom-item:hover {
+    background: linear-gradient(135deg, #ffe0b2, #ffcc80) !important;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 15px rgba(230, 81, 0, 0.2);
+}
+
+.add-custom-button {
+    background: linear-gradient(135deg, #e8f5e8, #f1f8e9) !important;
+    color: #2e7d32 !important;
+    font-weight: bold;
+    border: 2px dashed #81c784 !important;
+}
+
+.add-custom-button:hover {
+    background: linear-gradient(135deg, #c8e6c9, #dcedc8) !important;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.2);
+}
 
 /* --- Footer Fixo --- */
 footer {

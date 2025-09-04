@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearSearch = document.getElementById('clear-search');
     const itemCounter = document.getElementById('item-counter');
     const emptyStatePending = document.getElementById('empty-state-pending');
+    const manageCustomButton = document.getElementById('manage-custom-button');
 
     // Itens pré-definidos expandidos
     const predefinedItems = {
@@ -85,6 +86,61 @@ document.addEventListener('DOMContentLoaded', () => {
     let allItems = [];
     let filteredItems = [];
     let currentTheme = localStorage.getItem('theme') || 'light';
+    let customItems = JSON.parse(localStorage.getItem('customItems') || '{}');
+    let mergedItems = {};
+
+    // Mesclar itens predefinidos com personalizados
+    const mergePredefinedWithCustom = () => {
+        mergedItems = {};
+        Object.keys(predefinedItems).forEach(category => {
+            mergedItems[category] = {
+                icon: predefinedItems[category].icon,
+                items: [...predefinedItems[category].items]
+            };
+            
+            if (customItems[category]) {
+                mergedItems[category].items.push(...customItems[category]);
+                // Remover duplicatas e ordenar
+                mergedItems[category].items = [...new Set(mergedItems[category].items)].sort();
+            }
+        });
+    };
+
+    // Adicionar item personalizado a uma categoria
+    const addCustomItem = (category, itemName) => {
+        if (!itemName.trim()) return false;
+        
+        if (!customItems[category]) {
+            customItems[category] = [];
+        }
+        
+        const trimmedName = itemName.trim();
+        if (!customItems[category].includes(trimmedName) && !predefinedItems[category].items.includes(trimmedName)) {
+            customItems[category].push(trimmedName);
+            customItems[category].sort();
+            localStorage.setItem('customItems', JSON.stringify(customItems));
+            mergePredefinedWithCustom();
+            return true;
+        }
+        return false;
+    };
+
+    // Remover item personalizado de uma categoria
+    const removeCustomItem = (category, itemName) => {
+        if (!customItems[category]) return false;
+        
+        const index = customItems[category].indexOf(itemName);
+        if (index > -1) {
+            customItems[category].splice(index, 1);
+            if (customItems[category].length === 0) {
+                delete customItems[category];
+            }
+            localStorage.setItem('customItems', JSON.stringify(customItems));
+            mergePredefinedWithCustom();
+            return true;
+        }
+        return false;
+    };
 
     // Função principal de inicialização
     const initializeApp = () => {
@@ -95,6 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.location.search) {
             window.history.replaceState({}, '', window.location.pathname);
         }
+        
+        // Mesclar itens predefinidos com personalizados
+        mergePredefinedWithCustom();
         
         // Inicializar tema
         initializeTheme();
@@ -151,11 +210,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Filtrar itens com base na busca
     const filterItems = (searchTerm = '') => {
-        if (!searchTerm.trim()) {
+        if (!searchTerm || !searchTerm.trim()) {
             filteredItems = [...allItems];
         } else {
             filteredItems = allItems.filter(item => 
-                item.nome.toLowerCase().includes(searchTerm.toLowerCase())
+                item && item.nome && item.nome.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
         renderFilteredItems();
@@ -306,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateItemCounter();
             
             // Aplicar filtros
-            filterItems(searchInput.value);
+            filterItems(searchInput ? searchInput.value : '');
         });
     };
 
@@ -406,12 +465,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        const items = predefinedItems[categoryKey].items;
+        const items = mergedItems[categoryKey].items;
         items.forEach(itemText => {
             const itemEl = document.createElement('div');
             itemEl.className = 'quick-add-item';
-            itemEl.textContent = `+ ${itemText}`;
+            
+            // Marcar itens personalizados com um ícone diferente
+            const isCustom = customItems[categoryKey] && customItems[categoryKey].includes(itemText);
+            itemEl.textContent = isCustom ? `+ ${itemText} ⭐` : `+ ${itemText}`;
             itemEl.setAttribute('tabindex', '0');
+            
+            if (isCustom) {
+                itemEl.classList.add('custom-item');
+            }
+            
             itemEl.addEventListener('click', () => {
                 addItem(itemText);
                 // Feedback visual
@@ -431,6 +498,79 @@ document.addEventListener('DOMContentLoaded', () => {
             
             quickAddContainer.appendChild(itemEl);
         });
+
+        // Adicionar botão para criar novo item personalizado
+        const addCustomButton = document.createElement('div');
+        addCustomButton.className = 'quick-add-item add-custom-button';
+        addCustomButton.innerHTML = '+ Adicionar item personalizado';
+        addCustomButton.setAttribute('tabindex', '0');
+        addCustomButton.addEventListener('click', () => showAddCustomItemDialog(categoryKey));
+        addCustomButton.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                showAddCustomItemDialog(categoryKey);
+            }
+        });
+        quickAddContainer.appendChild(addCustomButton);
+    };
+
+    // Mostrar diálogo para adicionar item personalizado
+    const showAddCustomItemDialog = (category) => {
+        const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+        const itemName = prompt(`Adicionar novo item à categoria "${categoryName}":`);
+        
+        if (itemName && itemName.trim()) {
+            if (addCustomItem(category, itemName.trim())) {
+                alert(`Item "${itemName.trim()}" adicionado à categoria "${categoryName}"!`);
+                // Recarregar a categoria atual
+                showQuickAddItems(category);
+            } else {
+                alert('Este item já existe nesta categoria!');
+            }
+        }
+    };
+
+    // Mostrar diálogo para gerenciar itens personalizados
+    const showManageCustomItemsDialog = () => {
+        let dialogContent = 'Itens Personalizados:\n\n';
+        let hasCustomItems = false;
+        
+        Object.keys(customItems).forEach(category => {
+            if (customItems[category].length > 0) {
+                hasCustomItems = true;
+                const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+                dialogContent += `${predefinedItems[category].icon} ${categoryName}:\n`;
+                customItems[category].forEach((item, index) => {
+                    dialogContent += `  ${index + 1}. ${item}\n`;
+                });
+                dialogContent += '\n';
+            }
+        });
+        
+        if (!hasCustomItems) {
+            alert('Nenhum item personalizado foi adicionado ainda!');
+            return;
+        }
+        
+        dialogContent += 'Para remover um item, digite: categoria.item\nExemplo: limpeza.Sabão especial';
+        
+        const response = prompt(dialogContent + '\n\nDigite o item a remover (ou deixe vazio para cancelar):');
+        
+        if (response && response.trim()) {
+            const [category, ...itemParts] = response.trim().split('.');
+            const itemName = itemParts.join('.');
+            
+            if (category && itemName && removeCustomItem(category.toLowerCase(), itemName)) {
+                alert(`Item "${itemName}" removido da categoria "${category}"!`);
+                // Recarregar a categoria se estiver ativa
+                const activeChip = document.querySelector('.chip.active');
+                if (activeChip && activeChip.dataset.category === category.toLowerCase()) {
+                    showQuickAddItems(category.toLowerCase());
+                }
+            } else {
+                alert('Formato inválido ou item não encontrado!');
+            }
+        }
     };
 
     // Setup de todos os event listeners
@@ -485,6 +625,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Clear purchased
         clearPurchasedButton.addEventListener('click', clearPurchased);
+
+        // Manage custom items
+        manageCustomButton.addEventListener('click', showManageCustomItemsDialog);
 
         // Category chips
         categoryChips.addEventListener('click', (e) => {
