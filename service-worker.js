@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shopping-list-cache-v2';
+const CACHE_NAME = 'shopping-list-cache-v3';
 const URLS_TO_CACHE = [
     '/',
     '/index.html',
@@ -14,10 +14,13 @@ const URLS_TO_CACHE = [
 
 // Evento de instalação: pré-cache dos arquivos da aplicação
 self.addEventListener('install', event => {
+    // Força a ativação imediata do novo service worker
+    self.skipWaiting();
+    
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('Cache aberto');
+                console.log('Cache aberto - versão 3');
                 return cache.addAll(URLS_TO_CACHE);
             })
     );
@@ -40,12 +43,17 @@ self.addEventListener('fetch', event => {
 
 // Evento de ativação: limpa caches antigos
 self.addEventListener('activate', event => {
+    // Força todos os clientes a usar o novo service worker
+    event.waitUntil(self.clients.claim());
+    
     const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
         caches.keys().then(cacheNames => {
+            console.log('Limpando caches antigos...', cacheNames);
             return Promise.all(
                 cacheNames.map(cacheName => {
                     if (cacheWhitelist.indexOf(cacheName) === -1) {
+                        console.log('Removendo cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
