@@ -20,7 +20,7 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('Cache aberto - versão 3');
+                console.log('Cache aberto - versão 4');
                 return cache.addAll(URLS_TO_CACHE);
             })
     );
