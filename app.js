@@ -262,8 +262,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Se há busca ativa, não mostrar estado vazio
-        if (searchInput.value.trim()) {
-            emptyStatePending.classList.add('hidden');
+        if (searchInput && searchInput.value.trim()) {
+            if (emptyStatePending) {
+                emptyStatePending.classList.add('hidden');
+            }
         } else {
             toggleEmptyState();
         }
@@ -397,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateItemCounter();
             
             // Aplicar filtros
-            filterItems(searchInput ? searchInput.value : '');
+            filterItems(searchInput && searchInput.value ? searchInput.value : '');
         });
     };
 
@@ -663,69 +665,87 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup de todos os event listeners
     const setupEventListeners = () => {
         // Theme toggle
-        themeToggle.addEventListener('click', () => {
-            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-            localStorage.setItem('theme', currentTheme);
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
-        });
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+                localStorage.setItem('theme', currentTheme);
+                document.documentElement.setAttribute('data-theme', currentTheme);
+                themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+            });
+        }
 
         // Search toggle
-        searchToggle.addEventListener('click', () => {
-            searchContainer.classList.toggle('hidden');
-            if (!searchContainer.classList.contains('hidden')) {
-                searchInput.focus();
-            } else {
-                searchInput.value = '';
-                filterItems('');
-            }
-        });
-
-        // Search input
-        searchInput.addEventListener('input', (e) => {
-            filterItems(e.target.value);
-        });
-
-        // Clear search
-        clearSearch.addEventListener('click', () => {
-            searchInput.value = '';
-            filterItems('');
-            searchInput.focus();
-        });
-
-        // Form submit
-        addItemForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const value = itemInput.value.trim();
-            if (value) {
-                addItem(value);
-                itemInput.value = '';
-                
-                // Fechar busca se estiver aberta
+        if (searchToggle && searchContainer && searchInput) {
+            searchToggle.addEventListener('click', () => {
+                searchContainer.classList.toggle('hidden');
                 if (!searchContainer.classList.contains('hidden')) {
-                    searchContainer.classList.add('hidden');
+                    searchInput.focus();
+                } else {
                     searchInput.value = '';
                     filterItems('');
                 }
-            }
-        });
+            });
+        }
+
+        // Search input
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                filterItems(e.target.value);
+            });
+        }
+
+        // Clear search
+        if (clearSearch && searchInput) {
+            clearSearch.addEventListener('click', () => {
+                searchInput.value = '';
+                filterItems('');
+                searchInput.focus();
+            });
+        }
+
+        // Form submit
+        if (addItemForm && itemInput) {
+            addItemForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const value = itemInput.value.trim();
+                if (value) {
+                    addItem(value);
+                    itemInput.value = '';
+                    
+                    // Fechar busca se estiver aberta
+                    if (searchContainer && !searchContainer.classList.contains('hidden')) {
+                        searchContainer.classList.add('hidden');
+                        if (searchInput) {
+                            searchInput.value = '';
+                            filterItems('');
+                        }
+                    }
+                }
+            });
+        }
 
         // Clear purchased
-        clearPurchasedButton.addEventListener('click', clearPurchased);
+        if (clearPurchasedButton) {
+            clearPurchasedButton.addEventListener('click', clearPurchased);
+        }
 
         // Manage custom items
-        manageCustomButton.addEventListener('click', showManageCustomItemsDialog);
+        if (manageCustomButton) {
+            manageCustomButton.addEventListener('click', showManageCustomItemsDialog);
+        }
 
         // Category chips - event listeners são adicionados individualmente em loadCategories() para melhor compatibilidade mobile
         
         // Support para teclado nos chips (delegação de eventos)
-        categoryChips.addEventListener('keydown', (e) => {
-            if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('chip')) {
-                e.preventDefault();
-                const category = e.target.dataset.category;
-                showQuickAddItems(category);
-            }
-        });
+        if (categoryChips) {
+            categoryChips.addEventListener('keydown', (e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('chip')) {
+                    e.preventDefault();
+                    const category = e.target.dataset.category;
+                    showQuickAddItems(category);
+                }
+            });
+        }
     };
 
     // Remover event listeners duplicados (já foram movidos para setupEventListeners)
