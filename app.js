@@ -176,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Carregar categorias dinamicamente
     const loadCategories = () => {
+        console.log('loadCategories: carregando', Object.keys(predefinedItems).length, 'categorias'); // Debug
         categoryChips.innerHTML = '';
         Object.keys(predefinedItems).forEach(categoryKey => {
             const category = predefinedItems[categoryKey];
@@ -184,8 +185,21 @@ document.addEventListener('DOMContentLoaded', () => {
             chip.dataset.category = categoryKey;
             chip.innerHTML = `${category.icon} ${categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}`;
             chip.setAttribute('tabindex', '0');
+            
+            // Adicionar event listeners individuais para cada chip (melhor para mobile)
+            const handleChipClick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Chip clicado:', categoryKey); // Debug
+                showQuickAddItems(categoryKey);
+            };
+            
+            chip.addEventListener('click', handleChipClick);
+            chip.addEventListener('touchstart', handleChipClick, { passive: false });
+            
             categoryChips.appendChild(chip);
         });
+        console.log('loadCategories: categorias carregadas'); // Debug
     };
 
     // Atualizar contador de itens
@@ -454,6 +468,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Lógica para itens pré-definidos
     const showQuickAddItems = (categoryKey) => {
+        console.log('showQuickAddItems chamada para:', categoryKey); // Debug
+        
+        if (!categoryKey || !mergedItems[categoryKey]) {
+            console.error('Categoria inválida:', categoryKey); // Debug
+            return;
+        }
+        
         quickAddContainer.innerHTML = '';
         
         // Gerencia a classe 'active' nos chips
@@ -479,14 +500,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 itemEl.classList.add('custom-item');
             }
             
-            itemEl.addEventListener('click', () => {
+            // Event listeners com suporte a touch para mobile
+            const handleItemClick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 addItem(itemText);
                 // Feedback visual
                 itemEl.style.transform = 'scale(0.95)';
                 setTimeout(() => {
                     itemEl.style.transform = '';
                 }, 150);
-            });
+            };
+
+            itemEl.addEventListener('click', handleItemClick);
+            itemEl.addEventListener('touchstart', handleItemClick, { passive: false });
             
             // Suporte a teclado
             itemEl.addEventListener('keydown', (e) => {
@@ -504,7 +531,15 @@ document.addEventListener('DOMContentLoaded', () => {
         addCustomButton.className = 'quick-add-item add-custom-button';
         addCustomButton.innerHTML = '+ Adicionar item personalizado';
         addCustomButton.setAttribute('tabindex', '0');
-        addCustomButton.addEventListener('click', () => showAddCustomItemDialog(categoryKey));
+        // Event listeners com suporte a touch para mobile
+        const handleCustomButtonClick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showAddCustomItemDialog(categoryKey);
+        };
+
+        addCustomButton.addEventListener('click', handleCustomButtonClick);
+        addCustomButton.addEventListener('touchstart', handleCustomButtonClick, { passive: false });
         addCustomButton.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -629,15 +664,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Manage custom items
         manageCustomButton.addEventListener('click', showManageCustomItemsDialog);
 
-        // Category chips
-        categoryChips.addEventListener('click', (e) => {
-            if (e.target.classList.contains('chip')) {
-                const category = e.target.dataset.category;
-                showQuickAddItems(category);
-            }
-        });
-
-        // Support para teclado nos chips
+        // Category chips - event listeners são adicionados individualmente em loadCategories() para melhor compatibilidade mobile
+        
+        // Support para teclado nos chips (delegação de eventos)
         categoryChips.addEventListener('keydown', (e) => {
             if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('chip')) {
                 e.preventDefault();

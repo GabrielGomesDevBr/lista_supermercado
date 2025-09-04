@@ -601,6 +601,36 @@ li.purchased .quantity-btn {
     box-shadow: 0 4px 15px rgba(46, 125, 50, 0.2);
 }
 
+/* Melhorar touch experience no mobile */
+.chip, .quick-add-item {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Feedback visual para touch */
+.chip:active, .quick-add-item:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+@media (max-width: 768px) {
+    .chip {
+        min-height: 44px; /* Mínimo recomendado para touch targets */
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .quick-add-item {
+        min-height: 44px;
+        padding: 15px;
+        font-size: 0.85rem;
+    }
+}
+
 /* --- Footer Fixo --- */
 footer {
     position: fixed;
