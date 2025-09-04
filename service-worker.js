@@ -1,12 +1,15 @@
-const CACHE_NAME = 'shopping-list-cache-v1';
+const CACHE_NAME = 'shopping-list-cache-v2';
 const URLS_TO_CACHE = [
     '/',
     '/index.html',
     '/style.css',
     '/app.js',
+    '/env-config.js',
     '/manifest.json',
-    '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png'
+    '/icon-192.svg',
+    '/icon-512.svg',
+    'https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js'
 ];
 
 // Evento de instalação: pré-cache dos arquivos da aplicação
