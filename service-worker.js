@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shopping-list-cache-v4';
+const CACHE_NAME = 'shopping-list-cache-v5';
 const URLS_TO_CACHE = [
     '/',
     '/index.html',
@@ -6,8 +6,9 @@ const URLS_TO_CACHE = [
     '/app.js',
     '/env-config.js',
     '/manifest.json',
-    '/icon-192.svg',
-    '/icon-512.svg',
+    '/icon-192x192.png',
+    '/icon-512x512.png',
+    '/favicon.ico',
     'https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js',
     'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js'
 ];
@@ -20,8 +21,15 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('Cache aberto - versão 4');
-                return cache.addAll(URLS_TO_CACHE);
+                console.log('Cache aberto - versão 5 - Ícones atualizados');
+                // Limpar cache de ícones antigos primeiro
+                return Promise.all([
+                    cache.delete('/icon-192.svg'),
+                    cache.delete('/icon-512.svg')
+                ]).then(() => {
+                    // Então adicionar novos recursos
+                    return cache.addAll(URLS_TO_CACHE);
+                });
             })
     );
 });
@@ -41,23 +49,37 @@ self.addEventListener('fetch', event => {
     );
 });
 
-// Evento de ativação: limpa caches antigos
+// Evento de ativação: limpa caches antigos e força refresh do PWA
 self.addEventListener('activate', event => {
-    // Força todos os clientes a usar o novo service worker
-    event.waitUntil(self.clients.claim());
+    console.log('Service Worker ativando - v5 com novos ícones');
     
     const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            console.log('Limpando caches antigos...', cacheNames);
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheWhitelist.indexOf(cacheName) === -1) {
-                        console.log('Removendo cache:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
+        Promise.all([
+            // Força todos os clientes a usar o novo service worker
+            self.clients.claim(),
+            // Limpa todos os caches antigos
+            caches.keys().then(cacheNames => {
+                console.log('Caches encontrados:', cacheNames);
+                return Promise.all(
+                    cacheNames.map(cacheName => {
+                        if (cacheWhitelist.indexOf(cacheName) === -1) {
+                            console.log('Removendo cache antigo:', cacheName);
+                            return caches.delete(cacheName);
+                        }
+                    })
+                );
+            }),
+            // Força refresh da página para carregar novos recursos
+            self.clients.matchAll().then(clients => {
+                clients.forEach(client => {
+                    console.log('Enviando mensagem de reload para cliente');
+                    client.postMessage({
+                        type: 'CACHE_UPDATED',
+                        message: 'Ícones atualizados! Recarregando...'
+                    });
+                });
+            })
+        ])
     );
 });

@@ -835,8 +835,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => console.log('Service Worker registrado com sucesso:', registration))
+                .then(registration => {
+                    console.log('Service Worker registrado com sucesso:', registration);
+                    
+                    // Verificar se há atualizações
+                    registration.addEventListener('updatefound', () => {
+                        console.log('Nova versão do Service Worker encontrada');
+                        const newWorker = registration.installing;
+                        if (newWorker) {
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'activated') {
+                                    console.log('Nova versão ativada - recarregando página');
+                                    window.location.reload();
+                                }
+                            });
+                        }
+                    });
+                })
                 .catch(error => console.log('Falha ao registrar Service Worker:', error));
+                
+            // Escutar mensagens do Service Worker
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data && event.data.type === 'CACHE_UPDATED') {
+                    console.log('Cache atualizado:', event.data.message);
+                    // Recarregar página para aplicar novos recursos
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            });
         });
     }
 
