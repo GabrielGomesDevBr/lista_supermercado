@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shopping-list-cache-v5';
+const CACHE_NAME = 'shopping-list-cache-v6';
 const URLS_TO_CACHE = [
     '/',
     '/index.html',
@@ -8,6 +8,7 @@ const URLS_TO_CACHE = [
     '/manifest.json',
     '/icon-192x192.png',
     '/icon-512x512.png',
+    '/icon-maskable.png',
     '/favicon.ico',
     'https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js',
     'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js'
@@ -21,7 +22,7 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('Cache aberto - versão 5 - Ícones atualizados');
+                console.log('Cache aberto - versão 6 - Ícones PWA com fundo sólido');
                 // Limpar cache de ícones antigos primeiro
                 return Promise.all([
                     cache.delete('/icon-192.svg'),
@@ -51,7 +52,7 @@ self.addEventListener('fetch', event => {
 
 // Evento de ativação: limpa caches antigos e força refresh do PWA
 self.addEventListener('activate', event => {
-    console.log('Service Worker ativando - v5 com novos ícones');
+    console.log('Service Worker ativando - v6 com ícones PWA de fundo sólido');
     
     const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
