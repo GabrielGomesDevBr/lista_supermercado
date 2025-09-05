@@ -609,25 +609,87 @@ li.purchased .quantity-btn {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    /* Evitar highlight de seleção no mobile */
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* Feedback visual para touch */
-.chip:active, .quick-add-item:active {
-    transform: scale(0.95);
-    transition: transform 0.1s ease;
+/* Melhorar espaçamento para evitar toques acidentais */
+#category-chips {
+    display: flex;
+    gap: 15px; /* Aumentado de 10px para 15px */
+    flex-wrap: wrap;
+    margin-bottom: 25px; /* Aumentado de 20px para 25px */
+    padding: 5px; /* Adicionar padding interno */
 }
 
+#quick-add-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Aumentado de 140px */
+    gap: 15px; /* Aumentado de 12px para 15px */
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 10px; /* Aumentado de 5px para 10px */
+    /* Melhorar scroll no mobile */
+    -webkit-overflow-scrolling: touch;
+    /* Criar zona de scroll separada para evitar conflitos */
+    scroll-behavior: smooth;
+    /* Adicionar borda interna sutil para indicar área scrollável */
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 8px;
+    background-color: rgba(0,0,0,0.01);
+}
+
+/* Áreas de toque maiores para mobile */
 @media (max-width: 768px) {
     .chip {
-        min-height: 44px; /* Mínimo recomendado para touch targets */
-        padding: 12px 16px;
+        min-height: 48px; /* Aumentado de 44px para 48px */
+        min-width: 48px; /* Garantir largura mínima */
+        padding: 14px 18px; /* Aumentado padding */
         font-size: 0.9rem;
+        margin: 2px; /* Adicionar margem para separação */
     }
     
     .quick-add-item {
-        min-height: 44px;
-        padding: 15px;
+        min-height: 48px; /* Aumentado de 44px para 48px */
+        min-width: 48px;
+        padding: 16px; /* Aumentado padding */
         font-size: 0.85rem;
+        margin: 1px; /* Pequena margem para separação */
+    }
+    
+    #category-chips {
+        gap: 18px; /* Maior espaçamento no mobile */
+        justify-content: center; /* Centralizar chips */
+    }
+    
+    #quick-add-container {
+        gap: 18px; /* Maior espaçamento no mobile */
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+}
+
+/* Espaçamento extra para telas muito pequenas */
+@media (max-width: 480px) {
+    .chip {
+        min-height: 50px;
+        padding: 15px 20px;
+        margin: 3px;
+    }
+    
+    .quick-add-item {
+        min-height: 50px;
+        padding: 18px;
+        margin: 2px;
+    }
+    
+    #category-chips {
+        gap: 20px;
+        padding: 8px;
+    }
+    
+    #quick-add-container {
+        gap: 20px;
+        padding: 12px;
     }
 }
 
@@ -751,4 +813,66 @@ input:focus {
 /* --- Hidden Class --- */
 .hidden {
     display: none !important;
+}
+
+/* --- Melhorias Mobile Anti-Ghost Click --- */
+body {
+    /* Desabilitar double-tap zoom que pode causar clicks fantasma */
+    touch-action: pan-x pan-y;
+    -ms-touch-action: pan-x pan-y;
+}
+
+/* Área específica para scroll sem interferência */
+.scroll-area {
+    /* Permitir apenas scroll vertical nesta área */
+    touch-action: pan-y;
+    -ms-touch-action: pan-y;
+}
+
+/* Elementos interativos devem ter touch-action manipulation */
+button, .chip, .quick-add-item, input, .item-checkbox {
+    touch-action: manipulation;
+    -ms-touch-action: manipulation;
+}
+
+/* Melhorar performance de scroll em containers */
+#quick-add-container, .list-section ul {
+    /* Otimizar scroll para mobile */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    /* Transformação 3D para hardware acceleration */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* Evitar seleção de texto em elementos interativos */
+.chip, .quick-add-item, button {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Evitar context menu no mobile */
+    -webkit-touch-callout: none;
+}
+
+/* Adicionar padding extra em áreas críticas para mobile */
+@media (max-width: 768px) {
+    /* Mais espaço entre seções para evitar toques acidentais */
+    .list-section {
+        margin-top: 25px;
+        margin-bottom: 15px;
+    }
+    
+    #predefined-items {
+        margin-bottom: 20px;
+    }
+    
+    /* Melhorar área de scroll dos itens */
+    #quick-add-container {
+        /* Aumentar altura máxima em mobile para reduzir necessidade de scroll */
+        max-height: 250px;
+        /* Indicador visual de scroll */
+        scrollbar-width: thin;
+        scrollbar-color: var(--gray-light) transparent;
+    }
 }

@@ -90,6 +90,99 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTheme = localStorage.getItem('theme') || 'light';
     let customItems = JSON.parse(localStorage.getItem('customItems') || '{}');
     let mergedItems = {};
+    
+    // Sistema de prevenção de cliques fantasma
+    let lastTouchTime = 0;
+    let touchStartPos = { x: 0, y: 0 };
+    let isTouchDevice = 'ontouchstart' in window;
+    const TOUCH_DELAY = 300; // ms para evitar double-tap
+    const SCROLL_THRESHOLD = 10; // pixels para detectar scroll
+
+    // Função para criar handler de toque mobile-first
+    const createMobileTouchHandler = (callback, element) => {
+        let touchStartTime = 0;
+        let startX = 0;
+        let startY = 0;
+        let hasMoved = false;
+        
+        const touchStartHandler = (e) => {
+            touchStartTime = Date.now();
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            hasMoved = false;
+            
+            // Adicionar feedback visual imediato
+            element.style.transform = 'scale(0.95)';
+            element.style.transition = 'transform 0.1s ease';
+        };
+        
+        const touchMoveHandler = (e) => {
+            if (!touchStartTime) return;
+            
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            const deltaX = Math.abs(currentX - startX);
+            const deltaY = Math.abs(currentY - startY);
+            
+            // Se moveu mais que o threshold, considera como scroll
+            if (deltaX > SCROLL_THRESHOLD || deltaY > SCROLL_THRESHOLD) {
+                hasMoved = true;
+                // Remover feedback visual se começou a fazer scroll
+                element.style.transform = '';
+            }
+        };
+        
+        const touchEndHandler = (e) => {
+            const touchDuration = Date.now() - touchStartTime;
+            const timeSinceLastTouch = Date.now() - lastTouchTime;
+            
+            // Restaurar visual
+            element.style.transform = '';
+            
+            // Só executar se:
+            // 1. Não houve movimento (não é scroll)
+            // 2. Duração do toque foi curta (não é long press)
+            // 3. Tempo suficiente desde último toque (evita double-tap)
+            if (!hasMoved && touchDuration < 500 && timeSinceLastTouch > 150) {
+                e.preventDefault();
+                e.stopPropagation();
+                lastTouchTime = Date.now();
+                callback(e);
+            }
+            
+            touchStartTime = 0;
+        };
+        
+        const clickHandler = (e) => {
+            // Se é dispositivo touch, ignorar eventos de click
+            if (isTouchDevice) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+            // Para dispositivos sem touch, usar click normalmente
+            callback(e);
+        };
+        
+        // Adicionar listeners apropriados
+        if (isTouchDevice) {
+            element.addEventListener('touchstart', touchStartHandler, { passive: false });
+            element.addEventListener('touchmove', touchMoveHandler, { passive: false });
+            element.addEventListener('touchend', touchEndHandler, { passive: false });
+            element.addEventListener('click', clickHandler); // Para prevenir clicks fantasma
+        } else {
+            element.addEventListener('click', clickHandler);
+        }
+        
+        return {
+            destroy: () => {
+                element.removeEventListener('touchstart', touchStartHandler);
+                element.removeEventListener('touchmove', touchMoveHandler);
+                element.removeEventListener('touchend', touchEndHandler);
+                element.removeEventListener('click', clickHandler);
+            }
+        };
+    };
 
     // Mesclar itens predefinidos com personalizados
     const mergePredefinedWithCustom = () => {
@@ -204,16 +297,13 @@ document.addEventListener('DOMContentLoaded', () => {
             chip.innerHTML = `${category.icon} ${categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}`;
             chip.setAttribute('tabindex', '0');
             
-            // Adicionar event listeners individuais para cada chip (melhor para mobile)
+            // Usar novo sistema mobile-first
             const handleChipClick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
                 console.log('Chip clicado:', categoryKey); // Debug
                 showQuickAddItems(categoryKey);
             };
             
-            chip.addEventListener('click', handleChipClick);
-            chip.addEventListener('touchstart', handleChipClick, { passive: false });
+            createMobileTouchHandler(handleChipClick, chip);
             
             categoryChips.appendChild(chip);
         });
@@ -553,21 +643,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 itemEl.classList.add('custom-item');
             }
             
-            // Event listeners com suporte a touch para mobile
+            // Usar novo sistema mobile-first
             const handleItemClick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
                 console.log('Item clicado:', itemText); // Debug
                 addItem(itemText);
-                // Feedback visual
-                itemEl.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    itemEl.style.transform = '';
-                }, 150);
             };
 
-            itemEl.addEventListener('click', handleItemClick);
-            itemEl.addEventListener('touchstart', handleItemClick, { passive: false });
+            createMobileTouchHandler(handleItemClick, itemEl);
             
             // Suporte a teclado
             itemEl.addEventListener('keydown', (e) => {
@@ -585,15 +667,14 @@ document.addEventListener('DOMContentLoaded', () => {
         addCustomButton.className = 'quick-add-item add-custom-button';
         addCustomButton.innerHTML = '+ Adicionar item personalizado';
         addCustomButton.setAttribute('tabindex', '0');
-        // Event listeners com suporte a touch para mobile
-        const handleCustomButtonClick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+        
+        // Usar novo sistema mobile-first
+        const handleCustomButtonClick = () => {
             showAddCustomItemDialog(categoryKey);
         };
 
-        addCustomButton.addEventListener('click', handleCustomButtonClick);
-        addCustomButton.addEventListener('touchstart', handleCustomButtonClick, { passive: false });
+        createMobileTouchHandler(handleCustomButtonClick, addCustomButton);
+        
         addCustomButton.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
